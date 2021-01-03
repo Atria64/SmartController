@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartController", "SmartController\SmartController.csproj", "{E68F1047-A49A-4232-BB30-7B7C244C0DCF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartControllerAndroid", "SmartControllerAndroid\SmartControllerAndroid.csproj", "{B90074C2-B000-45E9-B962-7AF2B878D792}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E68F1047-A49A-4232-BB30-7B7C244C0DCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E68F1047-A49A-4232-BB30-7B7C244C0DCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E68F1047-A49A-4232-BB30-7B7C244C0DCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E68F1047-A49A-4232-BB30-7B7C244C0DCF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B90074C2-B000-45E9-B962-7AF2B878D792}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B90074C2-B000-45E9-B962-7AF2B878D792}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B90074C2-B000-45E9-B962-7AF2B878D792}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{B90074C2-B000-45E9-B962-7AF2B878D792}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B90074C2-B000-45E9-B962-7AF2B878D792}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B90074C2-B000-45E9-B962-7AF2B878D792}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0E499C62-3AE5-4E12-9678-625D754FA05B}
+	EndGlobalSection
+EndGlobal
