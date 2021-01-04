@@ -15,6 +15,7 @@ namespace SmartController
             this.listenIP = IPAddress.Parse(listenIP);
             this.listenPort = listenPort;
         }
+
         /// <summary>
         /// 何かしらの受信を待ちます。受信成功時trueを返します。
         /// </summary>
