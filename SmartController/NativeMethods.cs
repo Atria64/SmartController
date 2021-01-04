@@ -20,9 +20,9 @@ namespace SmartController
 
         //マウスポインタ座標取得用
         [DllImport("User32.dll")]
-        static extern bool GetCursorPos(out POINT lppoint);
+        internal static extern bool GetCursorPos(out POINT lppoint);
         [StructLayout(LayoutKind.Sequential)]
-        struct POINT
+        internal struct POINT
         {
             public int X { get; set; }
             public int Y { get; set; }
