@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -111,43 +112,37 @@ namespace SmartController
                             } while (ns.DataAvailable || bytes[resSize - 1] != '\n');
                             resMsg = encoding.GetString(ms.GetBuffer(), 0, (int)ms.Length);
                         }
-                        resMsg = resMsg.TrimEnd('\n');
                         Console.WriteLine($"Receive : {resMsg}");
+                        var msgs = resMsg.TrimEnd('\n').Split(' ');
+                        var MoveSpeed = int.Parse(msgs[1]);
 
                         //入力処理部
-                        
-                        /*
-                        if (resMsg == "u")
+                        //
+                        //想定フォーマット
+                        //mv {x} {y}
+                        if (msgs[0] == "mv")
                         {
-                            CursorMove(0, -MoveSpeed);
-                            Console.WriteLine("Up.");
+                            var x = int.Parse(msgs[1]);
+                            var y = int.Parse(msgs[2]);
+                            var nowpt = GetCursorPosition();
+                            NativeMethods.SetCursorPos(x-nowpt.X,y-nowpt.Y);
                         }
-                        else if (resMsg == "d")
-                        {
-                            CursorMove(0, MoveSpeed);
-                            Console.WriteLine("Down.");
-                        }
-                        else if (resMsg == "l")
-                        {
-                            CursorMove(-MoveSpeed, 0);
-                            Console.WriteLine("Left.");
-                        }
-                        else if (resMsg == "r")
-                        {
-                            CursorMove(MoveSpeed, 0);
-                            Console.WriteLine("Right.");
-                        }
-                        else if (resMsg == "c")
+                        else if (msgs[0] == "lc")
                         {
                             NativeMethods.mouse_event(NativeMethods.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
                             NativeMethods.mouse_event(NativeMethods.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
                             Console.WriteLine("LeftClicked.");
                         }
-                        else if (resMsg == "e")
+                        else if (msgs[0] == "rc")
+                        {
+                            NativeMethods.mouse_event(NativeMethods.MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+                            NativeMethods.mouse_event(NativeMethods.MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+                            Console.WriteLine("RightClicked.");
+                        }
+                        else if (msgs[0] == "e")
                         {
                             Continue = false;
                         }
-                        */
                     }
 
                     Console.WriteLine("Communication end.");
@@ -160,14 +155,11 @@ namespace SmartController
             });
         }
 
-        private void CursorMove(int x, int y)
+        public static Point GetCursorPosition()
         {
-            //System.Windows.Formsが利用できる場合のプロトタイプ
-            /*
-            int nowx = Cursor.Position.X;
-            int nowy = Cursor.Position.Y;
-            Cursor.Position = new System.Drawing.Point(nowx + x, nowy + y);
-            */
+            var pt = new NativeMethods.POINT();
+            NativeMethods.GetCursorPos(out pt);
+            return pt;
         }
     }
 }
