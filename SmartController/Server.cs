@@ -112,9 +112,8 @@ namespace SmartController
                             } while (ns.DataAvailable || bytes[resSize - 1] != '\n');
                             resMsg = encoding.GetString(ms.GetBuffer(), 0, (int)ms.Length);
                         }
-                        Console.WriteLine($"Receive : {resMsg}");
+                        Console.WriteLine($"Receive : {resMsg.TrimEnd('\n')}");
                         var msgs = resMsg.TrimEnd('\n').Split(' ');
-                        var MoveSpeed = int.Parse(msgs[1]);
 
                         //入力処理部
                         //
