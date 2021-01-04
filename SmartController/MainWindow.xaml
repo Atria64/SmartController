@@ -5,8 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SmartController"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="400">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="8*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Image x:Name="image" Margin="25,25,25,25" Grid.Row="0"/>
+        <Label x:Name="label" FontSize="22px" Content="QRコードを読み込む" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Grid.Row="1" Margin="10,5,10,5"/>
 
     </Grid>
 </Window>
