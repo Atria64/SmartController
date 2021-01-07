@@ -29,5 +29,11 @@ namespace SmartControllerAndroid
             MenuInflater.Inflate(Resource.Menu.option, menu);
             return true;
         }
+        public override bool OnOptionsItemSelected(IMenuItem item)
+        {
+            Toast.MakeText(this, "Action selected: " + item.TitleFormatted,
+                ToastLength.Short).Show();
+            return base.OnOptionsItemSelected(item);
+        }
     }
 }
