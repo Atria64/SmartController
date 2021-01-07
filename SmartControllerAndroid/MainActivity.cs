@@ -4,6 +4,8 @@ using Android.Support.V7.App;
 using Android.Runtime;
 using Android.Widget;
 using Android.Views;
+using Android.Support.Constraints;
+using Android.Support.V4.Content;
 
 namespace SmartControllerAndroid
 {
@@ -16,6 +18,14 @@ namespace SmartControllerAndroid
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.activity_main);
+            var qrButton = FindViewById<Button>(Resource.Id.qrButton);
+            var statusBar = FindViewById<ConstraintLayout>(Resource.Id.statusBar);
+            var textView = FindViewById<TextView>(Resource.Id.statusTextView); 
+            statusBar.Background = ContextCompat.GetDrawable(this,Resource.Color.badStatus);
+            textView.Text = "未接続";
+            qrButton.Click += (sender,e) =>{
+                Toast.MakeText(this, "QRボタンタップ", ToastLength.Short).Show();
+            };
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
