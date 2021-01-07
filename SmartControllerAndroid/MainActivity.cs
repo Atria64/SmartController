@@ -8,6 +8,9 @@ using Android.Support.Constraints;
 using Android.Support.V4.Content;
 using ZXing;
 using ZXing.Mobile;
+using Java.Net;
+using Java.IO;
+using System.Threading.Tasks;
 
 namespace SmartControllerAndroid
 {
@@ -15,6 +18,7 @@ namespace SmartControllerAndroid
     public class MainActivity : AppCompatActivity
     {
         MobileBarcodeScanner scanner;
+        Button qrButton;
         ConstraintLayout statusBar;
         TextView textView;
         Status nowStatus;
@@ -24,7 +28,7 @@ namespace SmartControllerAndroid
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.activity_main);
-            var qrButton = FindViewById<Button>(Resource.Id.qrButton);
+            qrButton = FindViewById<Button>(Resource.Id.qrButton);
             statusBar = FindViewById<ConstraintLayout>(Resource.Id.statusBar);
             textView = FindViewById<TextView>(Resource.Id.statusTextView);
             nowStatus = Status.BAD;
@@ -42,7 +46,7 @@ namespace SmartControllerAndroid
 
                 //Start scanning
                 var result = await scanner.Scan();
-                HandleScanResult(result);
+                HandleScanResultAsync(result);
             };
 
             UpdateStatus();
@@ -84,14 +88,19 @@ namespace SmartControllerAndroid
                     break;
             }
         }
-        void HandleScanResult(ZXing.Result result)
+        async void HandleScanResultAsync(ZXing.Result result)
         {
             var msg = "";
 
             if (result != null && !string.IsNullOrEmpty(result.Text))
             {
                 msg = "Found Barcode: " + result.Text;
-                nowStatus = Status.OK;
+                if (await SocketSend(result.Text, "ping"))
+                {
+                    nowStatus = Status.OK;
+                    qrButton.Visibility = ViewStates.Gone;
+                }
+                else nowStatus = Status.BAD;
             }
             else
             {
@@ -101,6 +110,26 @@ namespace SmartControllerAndroid
 
             UpdateStatus();
             RunOnUiThread(() => Toast.MakeText(this, msg, ToastLength.Short).Show());
+        }
+        private async Task<bool> SocketSend(string ip, string msg)
+        {
+            int port = 2001;
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    InetSocketAddress address = new InetSocketAddress(ip, port);
+                    Socket socket = new Socket();
+                    socket.Connect(address, 3000);
+                    using PrintWriter pw = new PrintWriter(socket.OutputStream, true);
+                    pw.Println(msg);
+                    return true;
+                }
+                catch (System.Exception e)
+                {
+                    return false;
+                }
+            });
         }
     }
 }
