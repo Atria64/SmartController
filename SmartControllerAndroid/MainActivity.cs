@@ -12,6 +12,9 @@ namespace SmartControllerAndroid
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
+        ConstraintLayout statusBar;
+        TextView textView;
+        Status nowStatus;
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -19,13 +22,16 @@ namespace SmartControllerAndroid
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.activity_main);
             var qrButton = FindViewById<Button>(Resource.Id.qrButton);
-            var statusBar = FindViewById<ConstraintLayout>(Resource.Id.statusBar);
-            var textView = FindViewById<TextView>(Resource.Id.statusTextView); 
-            statusBar.Background = ContextCompat.GetDrawable(this,Resource.Color.badStatus);
-            textView.Text = "未接続";
+            statusBar = FindViewById<ConstraintLayout>(Resource.Id.statusBar);
+            textView = FindViewById<TextView>(Resource.Id.statusTextView);
+            nowStatus = Status.OK;
             qrButton.Click += (sender,e) =>{
                 Toast.MakeText(this, "QRボタンタップ", ToastLength.Short).Show();
+                nowStatus = Status.UNKNOWN;
+                UpdateStatus();
             };
+
+            UpdateStatus();
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
@@ -44,6 +50,25 @@ namespace SmartControllerAndroid
             Toast.MakeText(this, "Action selected: " + item.TitleFormatted,
                 ToastLength.Short).Show();
             return base.OnOptionsItemSelected(item);
+        }
+
+        private void UpdateStatus()
+        {
+            switch (nowStatus)
+            {
+                case Status.BAD:
+                    statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.badStatus);
+                    textView.Text = "未接続";
+                    break;
+                case Status.UNKNOWN:
+                    statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.unknownStatus);
+                    textView.Text = "接続チェック中";
+                    break;
+                case Status.OK:
+                    statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.okStatus);
+                    textView.Text = "接続完了";
+                    break;
+            }
         }
     }
 }
