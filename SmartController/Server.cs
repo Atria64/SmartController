@@ -124,7 +124,7 @@ namespace SmartController
                             var x = (int)float.Parse(msgs[1]);
                             var y = (int)float.Parse(msgs[2]);
                             var nowpt = GetCursorPosition();
-                            NativeMethods.SetCursorPos(x-nowpt.X,y-nowpt.Y);
+                            NativeMethods.SetCursorPos(nowpt.X-x,nowpt.Y-y);
                         }
                         else if (msgs[0] == "lc")
                         {

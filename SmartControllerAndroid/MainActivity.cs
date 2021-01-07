@@ -165,7 +165,7 @@ namespace SmartControllerAndroid
                     {
                         var moveX = touchEventArgs.Event.GetX();
                         var moveY = touchEventArgs.Event.GetY();
-                        if((GeoLength(downX, downY, moveX, moveY) < 30)) SocketSendAsync(IpAddress, $"mv {downX - moveX} {downY - moveY}");
+                        if((GeoLength(downX, downY, moveX, moveY) > 30)) await SocketSendAsync(IpAddress, $"mv {downX - moveX} {downY - moveY}");
                         break;
                     }
                 case MotionEventActions.Up:
@@ -178,11 +178,11 @@ namespace SmartControllerAndroid
                             //通常タップ
                             if (touchEventArgs.Event.EventTime - touchEventArgs.Event.DownTime < 500)
                             {
-                                SocketSendAsync(IpAddress, "lc");
+                                await SocketSendAsync(IpAddress, "lc");
                             }
                             else //ロングタップ
                             {
-                                SocketSendAsync(IpAddress, "rc");
+                                await SocketSendAsync(IpAddress, "rc");
                             }
                         }
                         break;
