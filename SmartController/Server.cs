@@ -121,8 +121,8 @@ namespace SmartController
                         //mv {x} {y}
                         if (msgs[0] == "mv")
                         {
-                            var x = int.Parse(msgs[1]);
-                            var y = int.Parse(msgs[2]);
+                            var x = (int)float.Parse(msgs[1]);
+                            var y = (int)float.Parse(msgs[2]);
                             var nowpt = GetCursorPosition();
                             NativeMethods.SetCursorPos(x-nowpt.X,y-nowpt.Y);
                         }
