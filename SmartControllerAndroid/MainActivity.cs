@@ -6,12 +6,15 @@ using Android.Widget;
 using Android.Views;
 using Android.Support.Constraints;
 using Android.Support.V4.Content;
+using ZXing;
+using ZXing.Mobile;
 
 namespace SmartControllerAndroid
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
+        MobileBarcodeScanner scanner;
         ConstraintLayout statusBar;
         TextView textView;
         Status nowStatus;
@@ -24,11 +27,22 @@ namespace SmartControllerAndroid
             var qrButton = FindViewById<Button>(Resource.Id.qrButton);
             statusBar = FindViewById<ConstraintLayout>(Resource.Id.statusBar);
             textView = FindViewById<TextView>(Resource.Id.statusTextView);
-            nowStatus = Status.OK;
-            qrButton.Click += (sender,e) =>{
-                Toast.MakeText(this, "QRボタンタップ", ToastLength.Short).Show();
+            nowStatus = Status.BAD;
+            MobileBarcodeScanner.Initialize(Application);
+            scanner = new MobileBarcodeScanner();
+            qrButton.Click += async (sender,e) => {
                 nowStatus = Status.UNKNOWN;
                 UpdateStatus();
+                //Tell our scanner to use the default overlay
+                scanner.UseCustomOverlay = false;
+
+                //We can customize the top and bottom text of the default overlay
+                scanner.TopText = "QRコードを探しています";
+                scanner.BottomText = "PCソフトを起動して表示された\nQRコードを読み込んでください";
+
+                //Start scanning
+                var result = await scanner.Scan();
+                HandleScanResult(result);
             };
 
             UpdateStatus();
@@ -69,6 +83,24 @@ namespace SmartControllerAndroid
                     textView.Text = "接続完了";
                     break;
             }
+        }
+        void HandleScanResult(ZXing.Result result)
+        {
+            var msg = "";
+
+            if (result != null && !string.IsNullOrEmpty(result.Text))
+            {
+                msg = "Found Barcode: " + result.Text;
+                nowStatus = Status.OK;
+            }
+            else
+            {
+                msg = "Scanning Canceled!";
+                nowStatus = Status.BAD;
+            }
+
+            UpdateStatus();
+            RunOnUiThread(() => Toast.MakeText(this, msg, ToastLength.Short).Show());
         }
     }
 }
