@@ -11,6 +11,7 @@ using ZXing.Mobile;
 using Java.Net;
 using Java.IO;
 using System.Threading.Tasks;
+using System;
 
 namespace SmartControllerAndroid
 {
@@ -19,19 +20,26 @@ namespace SmartControllerAndroid
     {
         MobileBarcodeScanner scanner;
         Button qrButton;
+        ConstraintLayout mainLayout;
         ConstraintLayout statusBar;
         TextView textView;
         Status nowStatus;
+        string IpAddress;
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.activity_main);
+            
             qrButton = FindViewById<Button>(Resource.Id.qrButton);
+            mainLayout = FindViewById<ConstraintLayout>(Resource.Id.mainLayout);
             statusBar = FindViewById<ConstraintLayout>(Resource.Id.statusBar);
             textView = FindViewById<TextView>(Resource.Id.statusTextView);
+
             nowStatus = Status.BAD;
+            
             MobileBarcodeScanner.Initialize(Application);
             scanner = new MobileBarcodeScanner();
             qrButton.Click += async (sender,e) => {
@@ -95,23 +103,31 @@ namespace SmartControllerAndroid
             if (result != null && !string.IsNullOrEmpty(result.Text))
             {
                 msg = "Found Barcode: " + result.Text;
-                if (await SocketSend(result.Text, "ping"))
+                if (await SocketSendAsync(result.Text, "ping"))
                 {
+                    IpAddress = result.Text;
                     nowStatus = Status.OK;
                     qrButton.Visibility = ViewStates.Gone;
+                    mainLayout.Touch += OnTouch;
                 }
-                else nowStatus = Status.BAD;
+                else
+                {
+                    nowStatus = Status.BAD;
+                    qrButton.Visibility = ViewStates.Visible;
+                    mainLayout.Touch -= OnTouch;
+                }
             }
             else
             {
                 msg = "Scanning Canceled!";
                 nowStatus = Status.BAD;
+                mainLayout.Touch -= OnTouch;
             }
 
             UpdateStatus();
             RunOnUiThread(() => Toast.MakeText(this, msg, ToastLength.Short).Show());
         }
-        private async Task<bool> SocketSend(string ip, string msg)
+        private async Task<bool> SocketSendAsync(string ip, string msg)
         {
             int port = 2001;
             return await Task.Run(() =>
@@ -130,6 +146,55 @@ namespace SmartControllerAndroid
                     return false;
                 }
             });
+        }
+
+        float downX;
+        float downY;
+
+        private async void OnTouch(object sender, View.TouchEventArgs touchEventArgs)
+        {
+            switch (touchEventArgs.Event.Action & MotionEventActions.Mask)
+            {
+                case MotionEventActions.Down:
+                    {
+                        downX = touchEventArgs.Event.GetX();
+                        downY = touchEventArgs.Event.GetY();
+                        break;
+                    }
+                case MotionEventActions.Move:
+                    {
+                        var moveX = touchEventArgs.Event.GetX();
+                        var moveY = touchEventArgs.Event.GetY();
+                        if((GeoLength(downX, downY, moveX, moveY) < 30)) SocketSendAsync(IpAddress, $"mv {downX - moveX} {downY - moveY}");
+                        break;
+                    }
+                case MotionEventActions.Up:
+                    {
+                        var upX = touchEventArgs.Event.GetX();
+                        var upY = touchEventArgs.Event.GetY();
+                        //タップ時
+                        if ((GeoLength(downX, downY, upX, upY) < 30))
+                        {
+                            //通常タップ
+                            if (touchEventArgs.Event.EventTime - touchEventArgs.Event.DownTime < 500)
+                            {
+                                SocketSendAsync(IpAddress, "lc");
+                            }
+                            else //ロングタップ
+                            {
+                                SocketSendAsync(IpAddress, "rc");
+                            }
+                        }
+                        break;
+                    }
+            }
+        }
+
+        private double GeoLength(double x1, double y1, double x2, double y2)
+        {
+            double ret = Math.Sqrt(Math.Pow(x2 - x1, 2) +
+            Math.Pow(y2 - y1, 2));
+            return ret;
         }
     }
 }
