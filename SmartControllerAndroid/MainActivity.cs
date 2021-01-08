@@ -24,7 +24,6 @@ namespace SmartControllerAndroid
         ConstraintLayout mainLayout;
         ConstraintLayout statusBar;
         TextView textView;
-        Status nowStatus;
         string IpAddress;
         static bool repeatFlag = false;
 
@@ -34,19 +33,16 @@ namespace SmartControllerAndroid
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.activity_main);
-            
+
             qrButton = FindViewById<Button>(Resource.Id.qrButton);
             mainLayout = FindViewById<ConstraintLayout>(Resource.Id.mainLayout);
             statusBar = FindViewById<ConstraintLayout>(Resource.Id.statusBar);
             textView = FindViewById<TextView>(Resource.Id.statusTextView);
-
-            nowStatus = Status.BAD;
             
             MobileBarcodeScanner.Initialize(Application);
             scanner = new MobileBarcodeScanner();
             qrButton.Click += async (sender,e) => {
-                nowStatus = Status.UNKNOWN;
-                UpdateStatus();
+                UpdateStatus(Status.UNKNOWN);
                 //Tell our scanner to use the default overlay
                 scanner.UseCustomOverlay = false;
 
@@ -59,7 +55,7 @@ namespace SmartControllerAndroid
                 HandleScanResultAsync(result);
             };
 
-            UpdateStatus();
+            UpdateStatus(Status.BAD);
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
@@ -80,23 +76,31 @@ namespace SmartControllerAndroid
             return base.OnOptionsItemSelected(item);
         }
 
-        private void UpdateStatus()
+        private void UpdateStatus(Status nextStatus)
         {
-            switch (nowStatus)
-            {
-                case Status.BAD:
-                    statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.badStatus);
-                    textView.Text = "未接続";
-                    break;
-                case Status.UNKNOWN:
-                    statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.unknownStatus);
-                    textView.Text = "接続チェック中";
-                    break;
-                case Status.OK:
-                    statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.okStatus);
-                    textView.Text = "接続完了";
-                    break;
-            }
+            //UIはメインスレッドで操作する
+            var handler = new Handler(Looper.MainLooper);
+            handler.Post(() => {
+                switch (nextStatus)
+                {
+                    case Status.BAD:
+                        statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.badStatus);
+                        textView.Text = "未接続";
+                        mainLayout.Touch -= OnTouch;
+                        qrButton.Visibility = ViewStates.Visible;
+                        break;
+                    case Status.UNKNOWN:
+                        statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.unknownStatus);
+                        textView.Text = "接続チェック中";
+                        break;
+                    case Status.OK:
+                        statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.okStatus);
+                        textView.Text = "接続完了";
+                        mainLayout.Touch += OnTouch;
+                        qrButton.Visibility = ViewStates.Gone;
+                        break;
+                }
+            }); 
         }
         async void HandleScanResultAsync(ZXing.Result result)
         {
@@ -108,25 +112,19 @@ namespace SmartControllerAndroid
                 if (await SocketSendAsync(result.Text, "ping"))
                 {
                     IpAddress = result.Text;
-                    nowStatus = Status.OK;
-                    qrButton.Visibility = ViewStates.Gone;
-                    mainLayout.Touch += OnTouch;
+                    UpdateStatus(Status.OK);
                 }
                 else
                 {
-                    nowStatus = Status.BAD;
-                    qrButton.Visibility = ViewStates.Visible;
-                    mainLayout.Touch -= OnTouch;
+                    UpdateStatus(Status.BAD);
                 }
             }
             else
             {
                 msg = "Scanning Canceled!";
-                nowStatus = Status.BAD;
-                mainLayout.Touch -= OnTouch;
+                UpdateStatus(Status.BAD);
             }
 
-            UpdateStatus();
             RunOnUiThread(() => Toast.MakeText(this, msg, ToastLength.Short).Show());
         }
         private async Task<bool> SocketSendAsync(string ip, string msg)
@@ -183,11 +181,17 @@ namespace SmartControllerAndroid
                             //通常タップ
                             if (touchEventArgs.Event.EventTime - touchEventArgs.Event.DownTime < 500)
                             {
-                                await SocketSendAsync(IpAddress, "lc");
+                                if (await SocketSendAsync(IpAddress, "lc") is false)
+                                {
+                                    UpdateStatus(Status.BAD);
+                                }
                             }
                             else //ロングタップ
                             {
-                                await SocketSendAsync(IpAddress, "rc");
+                                if (await SocketSendAsync(IpAddress, "rc") is false)
+                                {
+                                    UpdateStatus(Status.BAD);
+                                }
                             }
                         }
                         break;
@@ -200,8 +204,14 @@ namespace SmartControllerAndroid
             new System.Threading.Thread(new System.Threading.ThreadStart( async () => {
                 while (repeatFlag)
                 {
-                    Thread.Sleep(100);
-                    if ((GeoLength(downX, downY, moveX, moveY) > 30)) await SocketSendAsync(IpAddress, $"mv {downX - moveX} {downY - moveY}");
+                    Thread.Sleep(50);
+                    if ((GeoLength(downX, downY, moveX, moveY) > 30))
+                    {
+                        if (await SocketSendAsync(IpAddress, $"mv {downX - moveX} {downY - moveY}") is false)
+                        {
+                            UpdateStatus(Status.BAD);
+                        }
+                    }
                 }
             })).Start();
         }
