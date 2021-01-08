@@ -12,6 +12,7 @@ using Java.Net;
 using Java.IO;
 using System.Threading.Tasks;
 using System;
+using System.Threading;
 
 namespace SmartControllerAndroid
 {
@@ -25,6 +26,7 @@ namespace SmartControllerAndroid
         TextView textView;
         Status nowStatus;
         string IpAddress;
+        static bool repeatFlag = false;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -150,6 +152,8 @@ namespace SmartControllerAndroid
 
         float downX;
         float downY;
+        float moveX;
+        float moveY;
 
         private async void OnTouch(object sender, View.TouchEventArgs touchEventArgs)
         {
@@ -159,17 +163,18 @@ namespace SmartControllerAndroid
                     {
                         downX = touchEventArgs.Event.GetX();
                         downY = touchEventArgs.Event.GetY();
+                        ButtonLongClicked();
                         break;
                     }
                 case MotionEventActions.Move:
                     {
-                        var moveX = touchEventArgs.Event.GetX();
-                        var moveY = touchEventArgs.Event.GetY();
-                        if((GeoLength(downX, downY, moveX, moveY) > 30)) await SocketSendAsync(IpAddress, $"mv {downX - moveX} {downY - moveY}");
+                        moveX = touchEventArgs.Event.GetX();
+                        moveY = touchEventArgs.Event.GetY();
                         break;
                     }
                 case MotionEventActions.Up:
                     {
+                        repeatFlag = false;
                         var upX = touchEventArgs.Event.GetX();
                         var upY = touchEventArgs.Event.GetY();
                         //タップ時
@@ -188,6 +193,17 @@ namespace SmartControllerAndroid
                         break;
                     }
             }
+        }
+        private void ButtonLongClicked()
+        {
+            repeatFlag = true;
+            new System.Threading.Thread(new System.Threading.ThreadStart( async () => {
+                while (repeatFlag)
+                {
+                    Thread.Sleep(100);
+                    if ((GeoLength(downX, downY, moveX, moveY) > 30)) await SocketSendAsync(IpAddress, $"mv {downX - moveX} {downY - moveY}");
+                }
+            })).Start();
         }
 
         private double GeoLength(double x1, double y1, double x2, double y2)
