@@ -19,6 +19,8 @@ namespace SmartControllerAndroid
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
+        private readonly int MoveSpeed = 5;
+        SocketManager socketManager;
         MobileBarcodeScanner scanner;
         Button qrButton;
         ConstraintLayout mainLayout;
@@ -38,10 +40,10 @@ namespace SmartControllerAndroid
             mainLayout = FindViewById<ConstraintLayout>(Resource.Id.mainLayout);
             statusBar = FindViewById<ConstraintLayout>(Resource.Id.statusBar);
             textView = FindViewById<TextView>(Resource.Id.statusTextView);
-            
+
             MobileBarcodeScanner.Initialize(Application);
             scanner = new MobileBarcodeScanner();
-            qrButton.Click += async (sender,e) => {
+            qrButton.Click += async (sender, e) => {
                 UpdateStatus(Status.UNKNOWN);
                 //Tell our scanner to use the default overlay
                 scanner.UseCustomOverlay = false;
@@ -100,18 +102,19 @@ namespace SmartControllerAndroid
                         qrButton.Visibility = ViewStates.Gone;
                         break;
                 }
-            }); 
+            });
         }
-        async void HandleScanResultAsync(ZXing.Result result)
+        private async void HandleScanResultAsync(ZXing.Result result)
         {
             var msg = "";
 
             if (result != null && !string.IsNullOrEmpty(result.Text))
             {
                 msg = "Found Barcode: " + result.Text;
-                if (await SocketSendAsync(result.Text, "ping"))
+                if (await (new SocketManager(result.Text).PingAsync()))
                 {
                     IpAddress = result.Text;
+                    socketManager = new SocketManager(IpAddress);
                     UpdateStatus(Status.OK);
                 }
                 else
@@ -126,26 +129,6 @@ namespace SmartControllerAndroid
             }
 
             RunOnUiThread(() => Toast.MakeText(this, msg, ToastLength.Short).Show());
-        }
-        private async Task<bool> SocketSendAsync(string ip, string msg)
-        {
-            int port = 2001;
-            return await Task.Run(() =>
-            {
-                try
-                {
-                    InetSocketAddress address = new InetSocketAddress(ip, port);
-                    Socket socket = new Socket();
-                    socket.Connect(address, 3000);
-                    using PrintWriter pw = new PrintWriter(socket.OutputStream, true);
-                    pw.Println(msg);
-                    return true;
-                }
-                catch (System.Exception)
-                {
-                    return false;
-                }
-            });
         }
 
         float downX;
@@ -181,14 +164,14 @@ namespace SmartControllerAndroid
                             //通常タップ
                             if (touchEventArgs.Event.EventTime - touchEventArgs.Event.DownTime < 500)
                             {
-                                if (await SocketSendAsync(IpAddress, "lc") is false)
+                                if (await socketManager.LeftClickAsync() is false)
                                 {
                                     UpdateStatus(Status.BAD);
                                 }
                             }
                             else //ロングタップ
                             {
-                                if (await SocketSendAsync(IpAddress, "rc") is false)
+                                if (await socketManager.RightClickAsync() is false)
                                 {
                                     UpdateStatus(Status.BAD);
                                 }
@@ -201,13 +184,13 @@ namespace SmartControllerAndroid
         private void ButtonLongClicked()
         {
             repeatFlag = true;
-            new System.Threading.Thread(new System.Threading.ThreadStart( async () => {
+            new System.Threading.Thread(new System.Threading.ThreadStart(async () => {
                 while (repeatFlag)
                 {
                     Thread.Sleep(50);
                     if ((GeoLength(downX, downY, moveX, moveY) > 30))
                     {
-                        if (await SocketSendAsync(IpAddress, $"mv {downX - moveX} {downY - moveY}") is false)
+                        if (await socketManager.MoveCursorAsync(downX - moveX, downY - moveY, MoveSpeed) is false)
                         {
                             UpdateStatus(Status.BAD);
                         }
