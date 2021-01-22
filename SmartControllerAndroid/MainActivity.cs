@@ -190,7 +190,9 @@ namespace SmartControllerAndroid
                     Thread.Sleep(50);
                     if ((GeoLength(downX, downY, moveX, moveY) > 30))
                     {
-                        if (await socketManager.MoveCursorAsync(downX - moveX, downY - moveY, MoveSpeed) is false)
+                        float xDifference = downX - moveX;
+                        float yDifference = downY - moveY;
+                        if (await socketManager.MoveCursorAsync(xDifference, yDifference, MoveSpeed) is false)
                         {
                             UpdateStatus(Status.BAD);
                         }
