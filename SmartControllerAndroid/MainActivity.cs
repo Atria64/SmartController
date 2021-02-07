@@ -1,10 +1,8 @@
 ﻿using Android.App;
 using Android.OS;
-using Android.Support.V7.App;
 using Android.Runtime;
 using Android.Widget;
 using Android.Views;
-using Android.Support.Constraints;
 using Android.Support.V4.Content;
 using ZXing;
 using ZXing.Mobile;
@@ -13,6 +11,8 @@ using Java.IO;
 using System.Threading.Tasks;
 using System;
 using System.Threading;
+using AndroidX.AppCompat.App;
+using AndroidX.ConstraintLayout.Widget;
 
 namespace SmartControllerAndroid
 {
