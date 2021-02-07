@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+  <PreferenceCategory android:title="一般" app:iconSpaceReserved="false">
+    <SeekBarPreference
+        app:key="MoveSpeed"
+        android:title="スワイプ感度"
+        android:summary="スワイプによる移動量を調節できます"
+        android:defaultValue="12"
+        app:iconSpaceReserved="false"
+        app:showSeekBarValue="true"/>
+    <SeekBarPreference
+        app:key="MaxMoveSpeed"
+        android:title="最大移動量"
+        android:summary="スワイプによる最大の移動量を設定できます"
+        android:defaultValue="12"
+        app:iconSpaceReserved="false"
+        app:showSeekBarValue="true"/>
+    <SeekBarPreference
+        app:key="RightClickDecisionTime"
+        android:title="右クリック判定時間"
+        android:summary="右クリックの判定時間を調節できます"
+        android:defaultValue="12"
+        app:iconSpaceReserved="false"
+        app:showSeekBarValue="true"/>
+  </PreferenceCategory>
+  <PreferenceCategory android:title="その他" app:iconSpaceReserved="false">
+    <PreferenceScreen
+        android:title="サーバ停止"
+        android:summary="サーバを停止させる通信を行います"
+        app:iconSpaceReserved="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+  </PreferenceCategory>
+  <PreferenceCategory
+      app:key="debug"
+      android:title="デバッグ"
+      app:isPreferenceVisible="false">
+    <PreferenceScreen
+        app:key="hoge"
+        android:title="hoge"
+        android:summary="hogehoge"
+        app:iconSpaceReserved="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+  </PreferenceCategory>
+</PreferenceScreen>
