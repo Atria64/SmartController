@@ -13,12 +13,13 @@ using AndroidX.AppCompat.App;
 
 namespace SmartControllerAndroid
 {
-    [Activity(Label = "PreferencesActivity")]
+    [Activity(Label = "設定")]
     public class PreferencesActivity : AppCompatActivity
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+            SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             SetContentView(Resource.Layout.activity_preferences);
 
             if (savedInstanceState == null)
@@ -28,6 +29,17 @@ namespace SmartControllerAndroid
                 transaction.Replace(Resource.Id.fragment_container, fragment);
                 transaction.Commit();
             }
+        }
+
+        public override bool OnOptionsItemSelected(IMenuItem item)
+        {
+            switch (item.ItemId)
+            {
+                case Android.Resource.Id.Home:
+                    Finish();
+                    break;
+            }
+            return base.OnOptionsItemSelected(item);
         }
     }
 }
