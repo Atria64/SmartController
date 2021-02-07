@@ -13,6 +13,7 @@ using System;
 using System.Threading;
 using AndroidX.AppCompat.App;
 using AndroidX.ConstraintLayout.Widget;
+using Android.Content;
 
 namespace SmartControllerAndroid
 {
@@ -73,8 +74,15 @@ namespace SmartControllerAndroid
         }
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            Toast.MakeText(this, "Action selected: " + item.TitleFormatted,
-                ToastLength.Short).Show();
+            switch (item.ItemId)
+            {
+                case Resource.Id.settings:
+                    var intent = new Intent(this, typeof(PreferencesActivity));
+                    StartActivity(intent);
+                    break;
+                default:
+                    break;
+            }
             return base.OnOptionsItemSelected(item);
         }
 
