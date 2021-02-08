@@ -80,6 +80,9 @@ namespace SmartControllerAndroid
                     var intent = new Intent(this, typeof(PreferencesActivity));
                     StartActivity(intent);
                     break;
+                case Resource.Id.menu_repository:
+                    OpenRepositoryUri();
+                    break;
                 default:
                     break;
             }
@@ -214,6 +217,13 @@ namespace SmartControllerAndroid
             double ret = Math.Sqrt(Math.Pow(x2 - x1, 2) +
             Math.Pow(y2 - y1, 2));
             return ret;
+        }
+        
+        private void OpenRepositoryUri()
+        {
+            var link = GetString(Resource.String.repository_uri);
+            var intent = new Intent(Intent.ActionDefault, Android.Net.Uri.Parse(link));
+            StartActivity(intent);
         }
     }
 }
