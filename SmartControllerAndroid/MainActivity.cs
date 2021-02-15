@@ -20,7 +20,7 @@ namespace SmartControllerAndroid
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
-        private readonly int MoveSpeed = 5;
+        private readonly uint MoveSpeed = 5;
         SocketManager socketManager;
         MobileBarcodeScanner scanner;
         Button qrButton;

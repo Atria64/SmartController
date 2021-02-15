@@ -54,10 +54,10 @@ namespace SmartControllerAndroid
         /// 移動を指す mv {x} {y} をIpAddressのPort番に飛ばす
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> MoveCursorAsync(float x, float y,int ratio)
+        public async Task<bool> MoveCursorAsync(float x, float y,uint ratio)
         {
             //0除算対策
-            if (ratio <= 0) ratio = 1;
+            if (ratio == 0) ratio = 1;
             return await SocketSendAsync($"mv {x/ratio} {y/ratio}");
         }
 
