@@ -18,7 +18,7 @@ namespace SmartControllerAndroid
             {
                 var preferences = PreferenceManager.GetDefaultSharedPreferences(Context);
                 preferences.Edit().Clear().Commit();
-                Toast.MakeText(Context, "設定をクリアしました。再起動してください。", ToastLength.Short).Show();
+                Toast.MakeText(Context, GetString(Resource.String.delete_preferences_description), ToastLength.Short).Show();
             };
 #endif
         }
