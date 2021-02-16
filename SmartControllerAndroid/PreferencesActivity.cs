@@ -22,7 +22,6 @@ namespace SmartControllerAndroid
             SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             SetContentView(Resource.Layout.activity_preferences);
 
-            var ipAddress = Intent.GetStringExtra("IpAddress");
 
             if (savedInstanceState == null)
             {
