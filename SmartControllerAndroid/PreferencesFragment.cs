@@ -10,6 +10,8 @@ namespace SmartControllerAndroid
         public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
         {
             AddPreferencesFromResource(Resource.Xml.preferences);
+            var moveSpeedSeekBarPreference = FindPreference("MoveSpeed") as SeekBarPreference;
+            moveSpeedSeekBarPreference.Min = 1;
 #if DEBUG
             var debugPreference = FindPreference("debug") as PreferenceCategory;
             debugPreference.Visible = true;
