@@ -9,6 +9,10 @@ namespace SmartControllerAndroid
         public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
         {
             AddPreferencesFromResource(Resource.Xml.preferences);
+#if DEBUG
+            var debugPreference = FindPreference("debug") as PreferenceCategory;
+            debugPreference.Visible = true;
+#endif
         }
     }
 }

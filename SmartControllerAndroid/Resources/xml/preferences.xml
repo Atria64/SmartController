@@ -35,6 +35,7 @@
   <PreferenceCategory
       app:key="debug"
       android:title="デバッグ"
+      app:iconSpaceReserved="false"
       app:isPreferenceVisible="false">
     <PreferenceScreen
         app:key="hoge"
