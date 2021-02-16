@@ -36,11 +36,12 @@
   <PreferenceCategory
       app:key="debug"
       android:title="デバッグ"
+      app:iconSpaceReserved="false"
       app:isPreferenceVisible="false">
     <PreferenceScreen
-        app:key="hoge"
-        android:title="hoge"
-        android:summary="hogehoge"
+        app:key="deletePreferences"
+        android:title="設定ファイル削除"
+        android:summary="設定ファイルをすべて削除します"
         app:iconSpaceReserved="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
