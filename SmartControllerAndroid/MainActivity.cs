@@ -27,10 +27,9 @@ namespace SmartControllerAndroid
         ConstraintLayout mainLayout;
         ConstraintLayout statusBar;
         TextView textView;
-        string IpAddress;
         static bool repeatFlag = false;
 
-        protected override void OnCreate(Bundle savedInstanceState)
+        protected override async void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
@@ -58,7 +57,13 @@ namespace SmartControllerAndroid
                 HandleScanResultAsync(result);
             };
 
-            UpdateStatus(Status.BAD);
+            string ipAddress = PreferenceManager.GetDefaultSharedPreferences(this).GetString("IpAddress", null);
+            if (await new SocketManager(ipAddress).PingAsync())
+            {
+                socketManager = new SocketManager(ipAddress);
+                UpdateStatus(Status.OK);
+            }
+            else UpdateStatus(Status.BAD);
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
@@ -124,8 +129,11 @@ namespace SmartControllerAndroid
                 msg = "Found Barcode: " + result.Text;
                 if (await (new SocketManager(result.Text).PingAsync()))
                 {
-                    IpAddress = result.Text;
+                    var IpAddress = result.Text;
                     socketManager = new SocketManager(IpAddress);
+                    var editor = PreferenceManager.GetDefaultSharedPreferences(this).Edit();
+                    editor.PutString("IpAddress",IpAddress);
+                    editor.Apply();
                     UpdateStatus(Status.OK);
                 }
                 else

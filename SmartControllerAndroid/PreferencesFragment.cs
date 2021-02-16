@@ -15,7 +15,22 @@ namespace SmartControllerAndroid
             var stopServerPreference = FindPreference("stopServer") as PreferenceScreen;
             stopServerPreference.PreferenceClick += async (sender, e) =>
             {
-                
+                string ipAddress = PreferenceManager.GetDefaultSharedPreferences(Context).GetString("IpAddress", null);
+                if (ipAddress == null)
+                {
+                    Toast.MakeText(Context, "null", ToastLength.Short).Show();
+                }
+                else
+                {
+                    if(await new SocketManager(ipAddress).ServerStopAsync())
+                    {
+                        Toast.MakeText(Context, "サーバーを停止しました", ToastLength.Short).Show();
+                    }
+                    else
+                    {
+                        Toast.MakeText(Context, "サーバーの接続に失敗しました", ToastLength.Short).Show();
+                    }
+                }
             };
 #if DEBUG
             var debugPreference = FindPreference("debug") as PreferenceCategory;
