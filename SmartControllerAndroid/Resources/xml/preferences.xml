@@ -18,9 +18,10 @@
         app:iconSpaceReserved="false"
         app:showSeekBarValue="true"/>
     <SeekBarPreference
+        app:isPreferenceVisible="false"
         app:key="RightClickDecisionTime"
         android:title="右クリック判定時間"
-        android:summary="右クリックの判定時間を調節できます"
+        android:summary="右クリックの判定時間を調節できます(v1.0非対応)"
         android:defaultValue="12"
         app:iconSpaceReserved="false"
         app:showSeekBarValue="true"/>
