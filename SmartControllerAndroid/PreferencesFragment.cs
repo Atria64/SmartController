@@ -12,6 +12,11 @@ namespace SmartControllerAndroid
             AddPreferencesFromResource(Resource.Xml.preferences);
             var moveSpeedSeekBarPreference = FindPreference("MoveSpeed") as SeekBarPreference;
             moveSpeedSeekBarPreference.Min = 1;
+            var stopServerPreference = FindPreference("stopServer") as PreferenceScreen;
+            stopServerPreference.PreferenceClick += async (sender, e) =>
+            {
+                
+            };
 #if DEBUG
             var debugPreference = FindPreference("debug") as PreferenceCategory;
             debugPreference.Visible = true;

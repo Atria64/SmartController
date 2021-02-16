@@ -66,6 +66,15 @@ namespace SmartControllerAndroid
         }
 
         /// <summary>
+        /// サーバー停止を指す e をIpAddressのPort番に飛ばす
+        /// </summary>
+        /// <returns></returns>
+        public async Task<bool> ServerStopAsync()
+        {
+            return await SocketSendAsync("e");
+        }
+
+        /// <summary>
         /// Socket通信を行う関数
         /// </summary>
         /// <param name="msg"></param>
