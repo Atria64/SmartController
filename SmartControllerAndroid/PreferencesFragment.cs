@@ -1,6 +1,5 @@
 ﻿using System;
 using Android.OS;
-using Android.Preferences;
 using AndroidX.Preference;
 
 namespace SmartControllerAndroid
