@@ -14,13 +14,13 @@ using System.Threading;
 using AndroidX.AppCompat.App;
 using AndroidX.ConstraintLayout.Widget;
 using Android.Content;
+using AndroidX.Preference;
 
 namespace SmartControllerAndroid
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
-        private readonly uint MoveSpeed = 5;
         SocketManager socketManager;
         MobileBarcodeScanner scanner;
         Button qrButton;
@@ -203,6 +203,7 @@ namespace SmartControllerAndroid
                     {
                         float xDifference = downX - moveX;
                         float yDifference = downY - moveY;
+                        uint MoveSpeed = (uint)PreferenceManager.GetDefaultSharedPreferences(this).GetInt("MoveSpeed", 1);
                         if (await socketManager.MoveCursorAsync(xDifference, yDifference, MoveSpeed) is false)
                         {
                             UpdateStatus(Status.BAD);

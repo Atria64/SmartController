@@ -7,7 +7,7 @@
         android:title="スワイプ感度"
         android:summary="スワイプによる移動量を調節できます"
         android:max="10"
-        android:defaultValue="5"
+        android:defaultValue="3"
         app:iconSpaceReserved="false"
         app:showSeekBarValue="true"/>
     <SeekBarPreference
