@@ -28,6 +28,7 @@
   </PreferenceCategory>
   <PreferenceCategory android:title="その他" app:iconSpaceReserved="false">
     <PreferenceScreen
+        app:key="stopServer"
         android:title="サーバ停止"
         android:summary="サーバを停止させる通信を行います"
         app:iconSpaceReserved="false"

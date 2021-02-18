@@ -22,6 +22,7 @@ namespace SmartControllerAndroid
             SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             SetContentView(Resource.Layout.activity_preferences);
 
+
             if (savedInstanceState == null)
             {
                 var fragment = new PreferencesFragment();

@@ -19,23 +19,25 @@ using AndroidX.Preference;
 namespace SmartControllerAndroid
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
-    public class MainActivity : AppCompatActivity
+    public class MainActivity : AppCompatActivity, ISharedPreferencesOnSharedPreferenceChangeListener
     {
+        ISharedPreferencesEditor editor;
         SocketManager socketManager;
         MobileBarcodeScanner scanner;
         Button qrButton;
         ConstraintLayout mainLayout;
         ConstraintLayout statusBar;
         TextView textView;
-        string IpAddress;
         static bool repeatFlag = false;
 
-        protected override void OnCreate(Bundle savedInstanceState)
+        protected override async void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.activity_main);
+
+            editor = PreferenceManager.GetDefaultSharedPreferences(this).Edit();
 
             qrButton = FindViewById<Button>(Resource.Id.qrButton);
             mainLayout = FindViewById<ConstraintLayout>(Resource.Id.mainLayout);
@@ -45,7 +47,7 @@ namespace SmartControllerAndroid
             MobileBarcodeScanner.Initialize(Application);
             scanner = new MobileBarcodeScanner();
             qrButton.Click += async (sender, e) => {
-                UpdateStatus(Status.UNKNOWN);
+                editor.PutInt("Status", (int)Status.UNKNOWN).Apply();
                 //Tell our scanner to use the default overlay
                 scanner.UseCustomOverlay = false;
 
@@ -58,7 +60,16 @@ namespace SmartControllerAndroid
                 HandleScanResultAsync(result);
             };
 
-            UpdateStatus(Status.BAD);
+            // PreferenceChangeListenerの登録
+            PreferenceManager.GetDefaultSharedPreferences(this).RegisterOnSharedPreferenceChangeListener(this);
+
+            string ipAddress = PreferenceManager.GetDefaultSharedPreferences(this).GetString("IpAddress", null);
+            if (await new SocketManager(ipAddress).PingAsync())
+            {
+                socketManager = new SocketManager(ipAddress);
+                editor.PutInt("Status", (int)Status.OK).Apply();
+            }
+            else editor.PutInt("Status", (int)Status.BAD).Apply();
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
@@ -89,32 +100,35 @@ namespace SmartControllerAndroid
             return base.OnOptionsItemSelected(item);
         }
 
-        private void UpdateStatus(Status nextStatus)
+        public void OnSharedPreferenceChanged(ISharedPreferences sharedPreferences, string key)
         {
-            //UIはメインスレッドで操作する
-            var handler = new Handler(Looper.MainLooper);
-            handler.Post(() => {
-                switch (nextStatus)
+            if (key == "Status")
+            {
+                var value = sharedPreferences.GetInt(key, -1);
+                switch (value)
                 {
-                    case Status.BAD:
+                    case (int)Status.BAD:
                         statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.badStatus);
                         textView.Text = "未接続";
                         mainLayout.Touch -= OnTouch;
                         qrButton.Visibility = ViewStates.Visible;
                         break;
-                    case Status.UNKNOWN:
+                    case (int)Status.UNKNOWN:
                         statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.unknownStatus);
                         textView.Text = "接続チェック中";
                         break;
-                    case Status.OK:
+                    case (int)Status.OK:
                         statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.okStatus);
                         textView.Text = "接続完了";
                         mainLayout.Touch += OnTouch;
                         qrButton.Visibility = ViewStates.Gone;
                         break;
+                    default:
+                        break;
                 }
-            });
+            }
         }
+
         private async void HandleScanResultAsync(ZXing.Result result)
         {
             var msg = "";
@@ -124,19 +138,21 @@ namespace SmartControllerAndroid
                 msg = "Found Barcode: " + result.Text;
                 if (await (new SocketManager(result.Text).PingAsync()))
                 {
-                    IpAddress = result.Text;
+                    var IpAddress = result.Text;
                     socketManager = new SocketManager(IpAddress);
-                    UpdateStatus(Status.OK);
+                    var editor = PreferenceManager.GetDefaultSharedPreferences(this).Edit();
+                    editor.PutString("IpAddress",IpAddress).Apply();
+                    editor.PutInt("Status", (int)Status.OK).Apply();
                 }
                 else
                 {
-                    UpdateStatus(Status.BAD);
+                    editor.PutInt("Status", (int)Status.BAD).Apply();
                 }
             }
             else
             {
                 msg = "Scanning Canceled!";
-                UpdateStatus(Status.BAD);
+                editor.PutInt("Status", (int)Status.BAD).Apply();
             }
 
             RunOnUiThread(() => Toast.MakeText(this, msg, ToastLength.Short).Show());
@@ -177,14 +193,14 @@ namespace SmartControllerAndroid
                             {
                                 if (await socketManager.LeftClickAsync() is false)
                                 {
-                                    UpdateStatus(Status.BAD);
+                                    editor.PutInt("Status", (int)Status.BAD).Apply();
                                 }
                             }
                             else //ロングタップ
                             {
                                 if (await socketManager.RightClickAsync() is false)
                                 {
-                                    UpdateStatus(Status.BAD);
+                                    editor.PutInt("Status", (int)Status.BAD).Apply();
                                 }
                             }
                         }
@@ -206,7 +222,7 @@ namespace SmartControllerAndroid
                         uint MoveSpeed = (uint)PreferenceManager.GetDefaultSharedPreferences(this).GetInt("MoveSpeed", 1);
                         if (await socketManager.MoveCursorAsync(xDifference, yDifference, MoveSpeed) is false)
                         {
-                            UpdateStatus(Status.BAD);
+                            editor.PutInt("Status", (int)Status.BAD).Apply();
                         }
                     }
                 }
