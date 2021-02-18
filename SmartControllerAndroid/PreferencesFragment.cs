@@ -30,6 +30,7 @@ namespace SmartControllerAndroid
                     {
                         Toast.MakeText(Context, "サーバーの接続に失敗しました", ToastLength.Short).Show();
                     }
+                    PreferenceManager.GetDefaultSharedPreferences(Context).Edit().PutInt("Status", (int)Status.BAD).Apply();
                 }
             };
 #if DEBUG
