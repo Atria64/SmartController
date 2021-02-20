@@ -54,7 +54,7 @@ namespace SmartControllerAndroid
         /// 移動を指す mv {x} {y} をIpAddressのPort番に飛ばす
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> MoveCursorAsync(float x, float y,uint moveSpeed)
+        public async Task<bool> MoveCursorAsync(float x, float y, uint moveSpeed, uint maxMoveSpeed)
         {
             // 0除算対策
             // 1 <= moveSpeed <= 10
@@ -62,7 +62,7 @@ namespace SmartControllerAndroid
             // 0.1 <= ratio <= 1.0 
             double ratio = moveSpeed * 0.1;
 
-            return await SocketSendAsync($"mv {x*ratio} {y*ratio}");
+            return await SocketSendAsync($"mv {RoundingRange(x * ratio, maxMoveSpeed * 10)} {RoundingRange(y * ratio, maxMoveSpeed * 10)}");
         }
 
         /// <summary>
@@ -97,6 +97,17 @@ namespace SmartControllerAndroid
                     return false;
                 }
             });
+        }
+
+        /// <summary>
+        /// -maxMoveSpeed <= value <= maxMoveSpeed になるように value を丸める
+        /// </summary>
+        /// <param name="value">丸める値</param>
+        /// <param name="maxMoveSpeed">上限下限の範囲</param>
+        /// <returns></returns>
+        private double RoundingRange(double value, uint maxMoveSpeed)
+        {
+            return Math.Min(maxMoveSpeed, Math.Max(value, -maxMoveSpeed));
         }
     }
 }
