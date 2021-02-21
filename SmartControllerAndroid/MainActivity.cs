@@ -162,6 +162,7 @@ namespace SmartControllerAndroid
         float downY;
         float moveX;
         float moveY;
+        bool is_moved = false;
 
         private async void OnTouch(object sender, View.TouchEventArgs touchEventArgs)
         {
@@ -171,6 +172,7 @@ namespace SmartControllerAndroid
                     {
                         downX = touchEventArgs.Event.GetX();
                         downY = touchEventArgs.Event.GetY();
+                        is_moved = false;
                         ButtonLongClicked();
                         break;
                     }
@@ -178,6 +180,7 @@ namespace SmartControllerAndroid
                     {
                         moveX = touchEventArgs.Event.GetX();
                         moveY = touchEventArgs.Event.GetY();
+                        is_moved = GeoLength(downX, downY, moveX, moveY) >= 30 || is_moved;
                         break;
                     }
                 case MotionEventActions.Up:
@@ -186,7 +189,7 @@ namespace SmartControllerAndroid
                         var upX = touchEventArgs.Event.GetX();
                         var upY = touchEventArgs.Event.GetY();
                         //タップ時
-                        if ((GeoLength(downX, downY, upX, upY) < 30))
+                        if (is_moved is false && GeoLength(downX, downY, upX, upY) < 30)
                         {
                             //通常タップ
                             if (touchEventArgs.Event.EventTime - touchEventArgs.Event.DownTime < 500)
