@@ -70,6 +70,7 @@ namespace SmartControllerAndroid
                 editor.PutInt("Status", (int)Status.OK).Apply();
             }
             else editor.PutInt("Status", (int)Status.BAD).Apply();
+            StatusUIApply();
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
@@ -100,32 +101,37 @@ namespace SmartControllerAndroid
             return base.OnOptionsItemSelected(item);
         }
 
+        private void StatusUIApply()
+        {
+            var value = PreferenceManager.GetDefaultSharedPreferences(this).GetInt("Status", -1);
+            switch (value)
+            {
+                case (int)Status.BAD:
+                    statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.badStatus);
+                    textView.Text = "未接続";
+                    mainLayout.Touch -= OnTouch;
+                    qrButton.Visibility = ViewStates.Visible;
+                    break;
+                case (int)Status.UNKNOWN:
+                    statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.unknownStatus);
+                    textView.Text = "接続チェック中";
+                    break;
+                case (int)Status.OK:
+                    statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.okStatus);
+                    textView.Text = "接続完了";
+                    mainLayout.Touch += OnTouch;
+                    qrButton.Visibility = ViewStates.Gone;
+                    break;
+                default:
+                    break;
+            }
+        }
+
         public void OnSharedPreferenceChanged(ISharedPreferences sharedPreferences, string key)
         {
             if (key == "Status")
             {
-                var value = sharedPreferences.GetInt(key, -1);
-                switch (value)
-                {
-                    case (int)Status.BAD:
-                        statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.badStatus);
-                        textView.Text = "未接続";
-                        mainLayout.Touch -= OnTouch;
-                        qrButton.Visibility = ViewStates.Visible;
-                        break;
-                    case (int)Status.UNKNOWN:
-                        statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.unknownStatus);
-                        textView.Text = "接続チェック中";
-                        break;
-                    case (int)Status.OK:
-                        statusBar.Background = ContextCompat.GetDrawable(this, Resource.Color.okStatus);
-                        textView.Text = "接続完了";
-                        mainLayout.Touch += OnTouch;
-                        qrButton.Visibility = ViewStates.Gone;
-                        break;
-                    default:
-                        break;
-                }
+                StatusUIApply();
             }
         }
 
