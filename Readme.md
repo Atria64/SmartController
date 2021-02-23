@@ -20,6 +20,9 @@ PC(Server)側ソフトウェア。**Windowsのみ対応。**
 # SmartControllerAndroid (Client)
 Android(Client)側ソフトウェア。QRコードを読み取って`Server`と接続を行います。   
 接続後、スワイプ&タップでカーソル操作を行うことができます。
+   
+最低APIレベルは26、プラットフォームバージョンはAndroid 8.0以上で動作します。
+
 
 ## Android側起動例
 <img src="https://user-images.githubusercontent.com/49768768/108812455-7cb98300-75f2-11eb-8fd8-ae1f9f3b992c.png" width="300px">
