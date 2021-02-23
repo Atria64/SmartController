@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">SmartControllerAndroid</string>
     <string name="action_settings">Settings</string>
+
+    <string name="menu_repository">GitHubリポジトリ</string>
+    <string name="menu_preferences">設定</string>
+
+    <string name="repository_uri">https://github.com/Atria64/SmartController</string>
+
+    <string name="delete_preferences_description">設定をクリアしました。再起動してください。</string>
 </resources>

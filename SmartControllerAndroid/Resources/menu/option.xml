@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <item
+      android:id="@+id/settings"
+      android:orderInCategory="200"
+      android:title="@string/menu_preferences"
+      app:showAsAction="never" />
+
+  <item 
+      android:id="@+id/menu_repository"
+      android:title="@string/menu_repository"
+      app:showAsAction="never" />
+
+</menu>
