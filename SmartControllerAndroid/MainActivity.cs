@@ -19,11 +19,7 @@ namespace SmartControllerAndroid
     {
         ISharedPreferencesEditor editor;
         SocketManager socketManager;
-        MobileBarcodeScanner scanner;
         Button qrButton;
-        ConstraintLayout mainLayout;
-        ConstraintLayout statusBar;
-        TextView textView;
         static bool repeatFlag = false;
 
         protected override async void OnCreate(Bundle savedInstanceState)
@@ -36,12 +32,9 @@ namespace SmartControllerAndroid
             editor = PreferenceManager.GetDefaultSharedPreferences(this).Edit();
 
             qrButton = FindViewById<Button>(Resource.Id.qrButton);
-            mainLayout = FindViewById<ConstraintLayout>(Resource.Id.mainLayout);
-            statusBar = FindViewById<ConstraintLayout>(Resource.Id.statusBar);
-            textView = FindViewById<TextView>(Resource.Id.statusTextView);
 
             MobileBarcodeScanner.Initialize(Application);
-            scanner = new MobileBarcodeScanner();
+            var scanner = new MobileBarcodeScanner();
             qrButton.Click += async (sender, e) => {
                 editor.PutInt("Status", (int)Status.UNKNOWN).Apply();
                 //Tell our scanner to use the default overlay
@@ -99,6 +92,9 @@ namespace SmartControllerAndroid
 
         private void StatusUIApply()
         {
+            var textView = FindViewById<TextView>(Resource.Id.statusTextView);
+            var statusBar = FindViewById<ConstraintLayout>(Resource.Id.statusBar);
+            var mainLayout = FindViewById<ConstraintLayout>(Resource.Id.mainLayout);
             var value = PreferenceManager.GetDefaultSharedPreferences(this).GetInt("Status", -1);
             switch (value)
             {
