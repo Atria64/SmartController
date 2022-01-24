@@ -22,7 +22,7 @@ namespace SmartControllerAndroid
             get => PreferenceManager.GetDefaultSharedPreferences(Activity).GetInt(PreferenceKey, DEFAULT_VALUE);
             set {
                 var pm = PreferenceManager.GetDefaultSharedPreferences(Activity).Edit();
-                pm.PutInt(PreferenceKey, (int)PreferenceValue).Apply();
+                pm.PutInt(PreferenceKey, (int)value).Apply();
             }
         }
     }
