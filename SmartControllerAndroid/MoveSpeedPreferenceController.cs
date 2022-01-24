@@ -22,5 +22,6 @@ namespace SmartControllerAndroid
         public string PreferenceKey => "MoveSpeed";
 
         public Activity Activity => _activity;
+
     }
 }

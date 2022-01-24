@@ -220,7 +220,7 @@ namespace SmartControllerAndroid
                     {
                         float xDifference = downX - moveX;
                         float yDifference = downY - moveY;
-                        uint MoveSpeed = (uint)PreferenceManager.GetDefaultSharedPreferences(this).GetInt("MoveSpeed", 1);
+                        uint MoveSpeed = (uint)((IIntPreferenceControllerInterface)new MoveSpeedPreferenceController(this)).PreferenceValue;
                         uint MaxMoveSpeed = (uint)PreferenceManager.GetDefaultSharedPreferences(this).GetInt("MaxMoveSpeed", 1);
                         if (await socketManager.MoveCursorAsync(xDifference, yDifference, MoveSpeed ,MaxMoveSpeed) is false)
                         {

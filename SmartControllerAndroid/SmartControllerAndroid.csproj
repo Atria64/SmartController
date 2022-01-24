@@ -66,6 +66,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainActivity.cs" />
+    <Compile Include="IIntPreferenceControllerInterface.cs" />
+    <Compile Include="MoveSpeedPreferenceController.cs" />
     <Compile Include="PreferencesActivity.cs" />
     <Compile Include="PreferencesFragment.cs" />
     <Compile Include="Resources\Resource.designer.cs" />

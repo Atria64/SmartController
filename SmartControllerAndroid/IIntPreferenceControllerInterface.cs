@@ -14,10 +14,10 @@ namespace SmartControllerAndroid
 {
     internal interface IIntPreferenceControllerInterface
     {
-        const int DEFAULT_VALUE = 0;
+        const int DEFAULT_VALUE = 1;
         Activity Activity { get; }
         string PreferenceKey { get; }
-        int PreferenceValue
+        public int PreferenceValue
         {
             get => PreferenceManager.GetDefaultSharedPreferences(Activity).GetInt(PreferenceKey, DEFAULT_VALUE);
             set {
