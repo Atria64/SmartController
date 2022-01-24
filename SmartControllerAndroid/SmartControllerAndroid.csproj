@@ -66,9 +66,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainActivity.cs" />
-    <Compile Include="IIntPreferenceControllerInterface.cs" />
-    <Compile Include="MaxMoveSpeedPreferenceController.cs" />
-    <Compile Include="MoveSpeedPreferenceController.cs" />
+    <Compile Include="PreferenceController\IIntPreferenceControllerInterface.cs" />
+    <Compile Include="PreferenceController\MaxMoveSpeedPreferenceController.cs" />
+    <Compile Include="PreferenceController\MoveSpeedPreferenceController.cs" />
     <Compile Include="PreferencesActivity.cs" />
     <Compile Include="PreferencesFragment.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
