@@ -8492,7 +8492,7 @@ namespace SmartControllerAndroid
 			public const int preference_copied = 2131689586;
 			
 			// aapt resource value: 0x7F0F0073
-			public const int repository_uri = 2131689587;
+			public const int repository_url = 2131689587;
 			
 			// aapt resource value: 0x7F0F0074
 			public const int search_menu_title = 2131689588;

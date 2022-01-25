@@ -4,11 +4,7 @@ using Android.Runtime;
 using Android.Widget;
 using Android.Views;
 using Android.Support.V4.Content;
-using ZXing;
 using ZXing.Mobile;
-using Java.Net;
-using Java.IO;
-using System.Threading.Tasks;
 using System;
 using System.Threading;
 using AndroidX.AppCompat.App;
@@ -21,13 +17,9 @@ namespace SmartControllerAndroid
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
     public class MainActivity : AppCompatActivity, ISharedPreferencesOnSharedPreferenceChangeListener
     {
-        ISharedPreferencesEditor editor;
         SocketManager socketManager;
-        MobileBarcodeScanner scanner;
+        StatusPreferenceController statusPreferenceController;
         Button qrButton;
-        ConstraintLayout mainLayout;
-        ConstraintLayout statusBar;
-        TextView textView;
         static bool repeatFlag = false;
 
         protected override async void OnCreate(Bundle savedInstanceState)
@@ -37,17 +29,14 @@ namespace SmartControllerAndroid
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.activity_main);
 
-            editor = PreferenceManager.GetDefaultSharedPreferences(this).Edit();
+            statusPreferenceController = new StatusPreferenceController(this);
 
             qrButton = FindViewById<Button>(Resource.Id.qrButton);
-            mainLayout = FindViewById<ConstraintLayout>(Resource.Id.mainLayout);
-            statusBar = FindViewById<ConstraintLayout>(Resource.Id.statusBar);
-            textView = FindViewById<TextView>(Resource.Id.statusTextView);
 
             MobileBarcodeScanner.Initialize(Application);
-            scanner = new MobileBarcodeScanner();
+            var scanner = new MobileBarcodeScanner();
             qrButton.Click += async (sender, e) => {
-                editor.PutInt("Status", (int)Status.UNKNOWN).Apply();
+                ((IIntPreferenceControllerInterface)statusPreferenceController).PreferenceValue = (int)Status.UNKNOWN;
                 //Tell our scanner to use the default overlay
                 scanner.UseCustomOverlay = false;
 
@@ -67,9 +56,9 @@ namespace SmartControllerAndroid
             if (await new SocketManager(ipAddress).PingAsync())
             {
                 socketManager = new SocketManager(ipAddress);
-                editor.PutInt("Status", (int)Status.OK).Apply();
+                ((IIntPreferenceControllerInterface)statusPreferenceController).PreferenceValue = (int)Status.OK;
             }
-            else editor.PutInt("Status", (int)Status.BAD).Apply();
+            else ((IIntPreferenceControllerInterface)statusPreferenceController).PreferenceValue = (int)Status.BAD;
             StatusUIApply();
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
@@ -93,7 +82,7 @@ namespace SmartControllerAndroid
                     StartActivity(intent);
                     break;
                 case Resource.Id.menu_repository:
-                    OpenRepositoryUri();
+                    OpenRepositoryUrl();
                     break;
                 default:
                     break;
@@ -103,7 +92,10 @@ namespace SmartControllerAndroid
 
         private void StatusUIApply()
         {
-            var value = PreferenceManager.GetDefaultSharedPreferences(this).GetInt("Status", -1);
+            var textView = FindViewById<TextView>(Resource.Id.statusTextView);
+            var statusBar = FindViewById<ConstraintLayout>(Resource.Id.statusBar);
+            var mainLayout = FindViewById<ConstraintLayout>(Resource.Id.mainLayout);
+            var value = ((IIntPreferenceControllerInterface)statusPreferenceController).PreferenceValue;
             switch (value)
             {
                 case (int)Status.BAD:
@@ -129,7 +121,7 @@ namespace SmartControllerAndroid
 
         public void OnSharedPreferenceChanged(ISharedPreferences sharedPreferences, string key)
         {
-            if (key == "Status")
+            if (key == statusPreferenceController.PreferenceKey)
             {
                 StatusUIApply();
             }
@@ -148,17 +140,17 @@ namespace SmartControllerAndroid
                     socketManager = new SocketManager(IpAddress);
                     var editor = PreferenceManager.GetDefaultSharedPreferences(this).Edit();
                     editor.PutString("IpAddress",IpAddress).Apply();
-                    editor.PutInt("Status", (int)Status.OK).Apply();
+                    ((IIntPreferenceControllerInterface)statusPreferenceController).PreferenceValue = (int)Status.OK;
                 }
                 else
                 {
-                    editor.PutInt("Status", (int)Status.BAD).Apply();
+                    ((IIntPreferenceControllerInterface)statusPreferenceController).PreferenceValue = (int)Status.BAD;
                 }
             }
             else
             {
                 msg = "Scanning Canceled!";
-                editor.PutInt("Status", (int)Status.BAD).Apply();
+                ((IIntPreferenceControllerInterface)statusPreferenceController).PreferenceValue = (int)Status.BAD;
             }
 
             RunOnUiThread(() => Toast.MakeText(this, msg, ToastLength.Short).Show());
@@ -202,14 +194,14 @@ namespace SmartControllerAndroid
                             {
                                 if (await socketManager.LeftClickAsync() is false)
                                 {
-                                    editor.PutInt("Status", (int)Status.BAD).Apply();
+                                    ((IIntPreferenceControllerInterface)statusPreferenceController).PreferenceValue = (int)Status.BAD;
                                 }
                             }
                             else //ロングタップ
                             {
                                 if (await socketManager.RightClickAsync() is false)
                                 {
-                                    editor.PutInt("Status", (int)Status.BAD).Apply();
+                                    ((IIntPreferenceControllerInterface)statusPreferenceController).PreferenceValue = (int)Status.BAD;
                                 }
                             }
                         }
@@ -228,11 +220,11 @@ namespace SmartControllerAndroid
                     {
                         float xDifference = downX - moveX;
                         float yDifference = downY - moveY;
-                        uint MoveSpeed = (uint)PreferenceManager.GetDefaultSharedPreferences(this).GetInt("MoveSpeed", 1);
-                        uint MaxMoveSpeed = (uint)PreferenceManager.GetDefaultSharedPreferences(this).GetInt("MaxMoveSpeed", 1);
+                        uint MoveSpeed = (uint)((IIntPreferenceControllerInterface)new MoveSpeedPreferenceController(this)).PreferenceValue;
+                        uint MaxMoveSpeed = (uint)((IIntPreferenceControllerInterface)new MaxMoveSpeedPreferenceController(this)).PreferenceValue;
                         if (await socketManager.MoveCursorAsync(xDifference, yDifference, MoveSpeed ,MaxMoveSpeed) is false)
                         {
-                            editor.PutInt("Status", (int)Status.BAD).Apply();
+                            ((IIntPreferenceControllerInterface)statusPreferenceController).PreferenceValue = (int)Status.BAD;
                         }
                     }
                 }
@@ -241,15 +233,14 @@ namespace SmartControllerAndroid
 
         private double GeoLength(double x1, double y1, double x2, double y2)
         {
-            double ret = Math.Sqrt(Math.Pow(x2 - x1, 2) +
-            Math.Pow(y2 - y1, 2));
-            return ret;
+            double result = Math.Sqrt(Math.Pow(x2 - x1, 2) + Math.Pow(y2 - y1, 2));
+            return result;
         }
         
-        private void OpenRepositoryUri()
+        private void OpenRepositoryUrl()
         {
-            var link = GetString(Resource.String.repository_uri);
-            var intent = new Intent(Intent.ActionDefault, Android.Net.Uri.Parse(link));
+            var repoLink = GetString(Resource.String.repository_url);
+            var intent = new Intent(Intent.ActionDefault, Android.Net.Uri.Parse(repoLink));
             StartActivity(intent);
         }
     }
